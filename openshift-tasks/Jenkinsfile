@@ -185,6 +185,7 @@ podTemplate(
           }
         }
       }
+    }
 
       stage('Switch over to new Version') {
         echo "Switching Production application to ${destApp}."
