@@ -185,7 +185,7 @@ podTemplate(
           }
         }
       }
-    }
+    
 
       stage('Switch over to new Version') {
         echo "Switching Production application to ${destApp}."
@@ -200,6 +200,8 @@ podTemplate(
           }
         }
       }
+    }
+  }
     
 
 // Convenience Functions to read version from the pom.xml
