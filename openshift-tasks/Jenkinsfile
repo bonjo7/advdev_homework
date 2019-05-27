@@ -82,11 +82,10 @@ podTemplate(
           openshift.withCluster() {
             openshift.withProject("${GUID}-tasks-dev") {
                 openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
-                openshift.tag("tasks:latest", "tasks:${devTag}")
+                  openshift.tag("tasks:latest", "tasks:${devTag}")
             }
           }
         }
-        
       }
 
       // Deploy the built image to the Development Environment.
