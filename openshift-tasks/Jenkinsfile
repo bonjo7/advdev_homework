@@ -46,7 +46,7 @@ podTemplate(
         sh "${mvnCmd} clean package -DskipTests=true"
       }
 
-      // TBD: The next two stages should run in parallel
+      // DONE: The next two stages should run in parallel
      
         // Using Maven run the unit tests
         stage('Unit Tests & Code Analysis') {
@@ -112,7 +112,7 @@ podTemplate(
 
           
               openshift.selector("dc", "tasks").rollout().latest();
-
+              openshift.set("env", "dc/tasks", "VERSION='${devTag} (tasks-dev)'", "--overwrite")
           
               def dc = openshift.selector("dc", "tasks").object()
               def dc_version = dc.status.latestVersion
