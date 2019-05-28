@@ -130,12 +130,12 @@ podTemplate(
                 else {
                   echo "*** tasks-dev returned unexpected name."
                   sleep 5
-                } 
+                }
+              }
               }
             }
           }
         }
-      }
 
       // Copy Image to Nexus container registry
       stage('Copy Image to Nexus container registry') {
