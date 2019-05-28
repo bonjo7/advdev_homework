@@ -118,15 +118,24 @@ podTemplate(
               def dc_version = dc.status.latestVersion
               def rc = openshift.selector("rc", "tasks-${dc_version}").object()
 
-              echo "Waiting for ReplicationController tasks-${dc_version} to be ready"
-                while (rc.spec.replicas != rc.status.readyReplicas) {
+              echo "Waiting for 'tasks' to appear in the curl response"
+              def tryAgain = true
+              def devTasksRoute = ""
+              while (tryAgain) {
+                devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}").trim()
+                if (devTasksRoute.contains("tasks")) {
+                  echo "*** tasks-dev validated successfully."
+                  tryAgain = false
+                }
+                else {
+                  echo "*** tasks-dev returned unexpected name."
                   sleep 5
-                  rc = openshift.selector("rc", "tasks-${dc_version}").object()
-                }  
+                } 
               }
             }
           }
         }
+      }
 
       // Copy Image to Nexus container registry
       stage('Copy Image to Nexus container registry') {
