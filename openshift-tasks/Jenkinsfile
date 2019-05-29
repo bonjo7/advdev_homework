@@ -104,16 +104,14 @@ podTemplate(
         script {
           openshift.withCluster() {
             openshift.withProject("${GUID}-tasks-dev") {
-         
-              openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${GUID}-tasks-dev/tasks:${devTag}") 
+              openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${GUID}-tasks-dev/tasks:${devTag}")
 
               openshift.selector('configmap', 'tasks-config').delete()
               def configmap = openshift.create('configmap', 'tasks-config', '--from-file=./configuration/application-users.properties', '--from-file=./configuration/application-roles.properties' )
 
-          
               openshift.selector("dc", "tasks").rollout().latest();
               openshift.set("env", "dc/tasks", "VERSION='${devTag} (tasks-dev)'", "--overwrite")
-          
+
               def dc = openshift.selector("dc", "tasks").object()
               def dc_version = dc.status.latestVersion
               def rc = openshift.selector("rc", "tasks-${dc_version}").object()
@@ -132,10 +130,10 @@ podTemplate(
                   sleep 5
                 }
               }
-              }
             }
           }
         }
+      }
 
       // Copy Image to Nexus container registry
       stage('Copy Image to Nexus container registry') {
@@ -208,9 +206,24 @@ podTemplate(
         script {
           openshift.withCluster() {
             openshift.withProject("${GUID}-tasks-prod") {
-            def route = openshift.selector("route/tasks").object()
+            def route = openshift.selector("route", "tasks").object()
             route.spec.to.name="${destApp}"
             openshift.apply(route)
+
+            echo "Waiting for '${destApp}' to appear in the curl response"
+                def tryAgain = true
+                def tasksRoute = ""
+                while (tryAgain) {
+                  tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+                  if (tasksRoute.contains("${destApp}")) {
+                    echo "*** ${destApp} validated successfully."
+                    tryAgain = false
+                  }
+                  else {
+                    echo "*** ${destApp} returned unexpected name."
+                    sleep 5
+                  }
+                }
             }
           }
         }
